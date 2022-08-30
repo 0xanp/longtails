@@ -27,7 +27,7 @@ Designed to support docs/social/freemason-frontrunning.md
 
 URLS = {
     "TOKEN_OWNER": "https://deep-index.moralis.io/api/v2/nft/{0}/{1}/owners?chain=eth&format=decimal",
-    "MEMBERS": "http://www.nftinspect.xyz/api/collections/members/{0}?limit=2000&onlyNewMembers=false",
+    "MEMBERS": "http://www.nftinspect.xyz/api/collections/members/{0}?limit=25&onlyNewMembers=false",
     "DETAILS": "https://www.nftinspect.xyz/api/collections/details/{0}"
 }
 

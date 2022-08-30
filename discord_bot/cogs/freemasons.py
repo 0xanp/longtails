@@ -92,7 +92,7 @@ class FreeMasons(commands.Cog):
         await interaction.response.send_message("Updating status.", ephemeral=True)
 
         project_obj, created = FreeMasonProject.objects.get_or_create(
-            contract_address=contract_address
+            contract_address=contract_address.lower()
         )
 
         project_obj.watching = not project_obj.watching
