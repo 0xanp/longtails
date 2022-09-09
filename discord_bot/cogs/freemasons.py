@@ -41,7 +41,7 @@ class FreeMasons(commands.Cog):
 
     async def send_summary(self, title_key, project_obj, summary):
         embed = discord.Embed(
-            title=f"[Curated Follows of {project_obj.name}]",
+            title=f"{project_obj.name} owners have started following these accounts",
             description="\n".join(
                 [f"[{member_inst['username']}](https://twitter.com/i/user/{member_inst['twitter_identifier']}): {member_inst['count']}" for member_inst in summary])
         )
