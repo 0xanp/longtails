@@ -29,6 +29,11 @@ class FreeMasons(commands.Cog):
             name=settings.DISCORD_CHANNEL_NAME
         )
 
+        self.longtails_log_channel = discord.utils.get(
+            self.guild.text_channels,
+            name=settings.DISCORD_LOG_CHANNEL_NAME
+        )        
+
         self.twitter_client = TwitterClient()
 
         self.sync_projects.start()
@@ -36,16 +41,16 @@ class FreeMasons(commands.Cog):
 
     async def send_summary(self, title_key, project_obj, summary):
         embed = discord.Embed(
-            title=f"[FreeMasons] [{title_key}] [{project_obj.name}]",
+            title=f"[Curated Follows of {project_obj.name}]",
             description="\n".join(
                 [f"[{member_inst['username']}](https://twitter.com/i/user/{member_inst['twitter_identifier']}): {member_inst['count']}" for member_inst in summary])
         )
-
+        '''
         embed.add_field(
             name="CONTRACT",
             value=project_obj.contract_address
         )
-
+        '''
         await self.longtails_channel.send(embed=embed)
 
     @tasks.loop(seconds=60)
@@ -69,7 +74,7 @@ class FreeMasons(commands.Cog):
                     value=project_obj.contract_address
                 )
 
-                await self.longtails_channel.send(embed=embed)
+                await self.longtails_log_channel.send(embed=embed)
 
                 await project_obj.sync()
 
@@ -77,11 +82,11 @@ class FreeMasons(commands.Cog):
                 next_sync_at__lte=django.utils.timezone.now()
             ) | project_obj.members.filter(next_sync_at__isnull=True):
                 print(
-                    f'[FreeMasons] [Sync] [Member] {member.twitter.username}')
+                    f'[FreeMasons] [Sync] [Member] {member.twitter.username}')  
                 await member.sync(self.twitter_client)
 
             if not project_obj.last_summarized_at or project_obj.last_summarized_at < django.utils.timezone.now() - datetime.timedelta(seconds=SECONDS_BETWEEN_SYNC):
-                await self.send_summary('Followed By', project_obj, project_obj.member_following_summary[:50])
+                await self.send_summary('Followed By', project_obj, project_obj.member_following_summary[:20])
                 # await self.send_summary('Follower Of', project_obj, project_obj.member_follower_summary[:50])
 
                 project_obj.last_summarized_at = django.utils.timezone.now()
