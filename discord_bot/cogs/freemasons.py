@@ -108,7 +108,7 @@ class FreeMasons(commands.Cog):
         project_obj.save()
 
         embed = discord.Embed(
-            title=f"[FreeMasons] [Watching] [{project_obj.name}]"
+            title=f"Watching {project_obj.name}"
         )
 
         embed.add_field(name="Contract address", value=contract_address)
@@ -118,7 +118,7 @@ class FreeMasons(commands.Cog):
             inline=False
         )
 
-        await self.longtails_channel.send(embed=embed)
+        await self.longtails_log_channel.send(embed=embed)
 
     @app_commands.command(name="watching")
     async def watching(self, interaction: discord.Interaction) -> None:
@@ -127,7 +127,7 @@ class FreeMasons(commands.Cog):
         projects = FreeMasonProject.objects.filter(watching=True)
 
         embed = discord.Embed(
-            title=f"[FreeMasons] [Watching] [Projects]",
+            title=f"ML Twitter Bot is currently watching:",
             description="\n".join(
                 f"[{project_obj.name}]({project_obj.twitter})" for project_obj in projects.all())
         )
@@ -145,7 +145,7 @@ class FreeMasons(commands.Cog):
         # return no data message if we don't have this user in the database
         if not twitter_user_obj.exists():
             embed = discord.Embed(
-                title=f"[FreeMasons] Never scraped {twitter_username}",
+                title=f"ML Twitter Bot never scraped {twitter_username}",
             )
 
             await self.longtails_channel.send(embed=embed)
@@ -162,7 +162,7 @@ class FreeMasons(commands.Cog):
         if members.count() == 0 or description == "":
             # return no data message if we don't have this user in the database
             embed = discord.Embed(
-                title=f"[FreeMasons] {twitter_username} is not a hot follow.",
+                title=f"{twitter_username} is not a hot follow.",
             )
 
             await self.longtails_channel.send(embed=embed)
@@ -171,7 +171,7 @@ class FreeMasons(commands.Cog):
 
         # return output
         embed = discord.Embed(
-            title=f"[FreeMasons] [Watching] [Follower Of] {twitter_username}",
+            title=f"Followers Of {twitter_username}",
             description=description
         )
 
