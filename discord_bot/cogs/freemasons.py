@@ -1,7 +1,7 @@
 import datetime
 import django
 import discord
-
+import requests
 from django.conf import settings
 
 from discord import app_commands
@@ -12,6 +12,11 @@ from asgiref.sync import sync_to_async
 from freemasons.models import SECONDS_BETWEEN_SYNC, FreeMasonMember, FreeMasonProject, TwitterUser
 from twitter.client import TwitterClient
 
+URLS = {
+    "TOKEN_OWNER": "https://deep-index.moralis.io/api/v2/nft/{0}/{1}/owners?chain=eth&format=decimal",
+    "MEMBERS": "http://www.nftinspect.xyz/api/collections/members/{0}?limit=2000&onlyNewMembers=false",
+    "DETAILS": "https://www.nftinspect.xyz/api/collections/details/{0}"
+}
 
 class FreeMasons(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -86,7 +91,7 @@ class FreeMasons(commands.Cog):
                 await member.sync(self.twitter_client)
 
             if not project_obj.last_summarized_at or project_obj.last_summarized_at < django.utils.timezone.now() - datetime.timedelta(seconds=SECONDS_BETWEEN_SYNC):
-                await self.send_summary('Followed By', project_obj, project_obj.member_following_summary[:20])
+                await self.send_summary('Followed By', project_obj, project_obj.member_following_summary[:30])
                 # await self.send_summary('Follower Of', project_obj, project_obj.member_follower_summary[:50])
 
                 project_obj.last_summarized_at = django.utils.timezone.now()
@@ -95,29 +100,36 @@ class FreeMasons(commands.Cog):
     @app_commands.command(name="watch")
     async def watch(self, interaction: discord.Interaction, contract_address: str) -> None:
         await interaction.response.send_message("Updating status.", ephemeral=True)
-
-        project_obj, created = FreeMasonProject.objects.get_or_create(
+        response = requests.get(URLS["DETAILS"].format(contract_address.lower()))
+        
+        if response.status_code == 200:
+            project_obj, created = FreeMasonProject.objects.get_or_create(
             contract_address=contract_address.lower()
-        )
+            )
 
-        project_obj.watching = not project_obj.watching
+            project_obj.watching = not project_obj.watching
 
-        if project_obj.watching:
-            await project_obj.sync()
+            if project_obj.watching:
+                await project_obj.sync()
 
-        project_obj.save()
+            project_obj.save()
 
-        embed = discord.Embed(
-            title=f"Watching {project_obj.name}"
-        )
+            embed = discord.Embed(
+                title=f"Watching {project_obj.name}"
+            )
 
-        embed.add_field(name="Contract address", value=contract_address)
-        embed.add_field(
-            name="Watching",
-            value="✅" if project_obj.watching else "❌",
-            inline=False
-        )
-
+            embed.add_field(name="Contract address", value=contract_address)
+            embed.add_field(
+                name="Watching",
+                value="✅" if project_obj.watching else "❌",
+                inline=False
+            )
+            response.close()
+        else:
+            embed = discord.Embed(
+                title="Can't find entered project, please double check the smart contract address and wait a minute before trying again"
+            )
+            response.close()
         await self.longtails_log_channel.send(embed=embed)
 
     @app_commands.command(name="watching")
