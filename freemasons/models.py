@@ -216,7 +216,7 @@ class FreeMasonProject(models.Model):
 
             twitter_client = TwitterClient()
 
-            members = response_data['members'][:50]
+            members = response_data['members'][:100]
 
             member_usernames = [member['username'] for member in members]
             member_twitter_ids = await twitter_client.get_username_ids(
