@@ -43,7 +43,7 @@ class TwitterClient:
         if response.status_code == 200:
             if 'data' in response.json():
                 return response.json()['data']
-            return {}
+            return []
 
         print('[Twitter Client] [Error]', response.json())
         return {} 
