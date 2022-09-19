@@ -126,9 +126,17 @@ class FreeMasonMember(models.Model):
         # catch rate limit failures and recall this function after a timeout
         if isinstance(followers, dict) or isinstance(following, dict):
             await self.sync(twitter_client)
-
-        for i, twitter_user in enumerate(followers + following):
-            self.handle_twitter_user(i < len(followers), twitter_user)
+        
+        # check if following or follower list is empty
+        if len(following) < 1:
+            for i, twitter_user in enumerate(followers):
+                self.handle_twitter_user(i < len(followers), twitter_user)
+        elif len(followers) < 1:
+            for i, twitter_user in enumerate(following):
+                self.handle_twitter_user(i < len(followers), twitter_user)
+        else:
+            for i, twitter_user in enumerate(followers + following):
+                self.handle_twitter_user(i < len(followers), twitter_user)
 
         self.next_sync_at = django.utils.timezone.now(
         ) + datetime.timedelta(seconds=SECONDS_BETWEEN_SYNC)
