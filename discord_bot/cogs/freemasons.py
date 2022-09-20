@@ -64,7 +64,7 @@ class FreeMasons(commands.Cog):
             writer.writerows(data)
         buffer.seek(0) #Don't know why this is here, but it worked...
         csv.close()
-        await self.longtails_log_channel.send(file=discord.File(buffer, f"{project_obj.name}.csv"))
+        await self.longtails_log_channel.send(file=discord.File(buffer, f"{project_obj.name}-{django.utils.timezone.now()}.csv"))
         await self.longtails_channel.send(embed=embed)
 
     @tasks.loop(seconds=60)
