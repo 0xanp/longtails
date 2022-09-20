@@ -3,6 +3,8 @@ import django
 import discord
 import requests
 from django.conf import settings
+import csv
+import io
 
 from discord import app_commands
 from discord.ext import commands, tasks
@@ -45,17 +47,24 @@ class FreeMasons(commands.Cog):
         print('[FreeMasons] Online.')
 
     async def send_summary(self, title_key, project_obj, summary):
+        # prepare an embeded summary message 
         embed = discord.Embed(
             title=f"{project_obj.name} owners have started following these accounts",
             description="\n".join(
                 [f"[{member_inst['username']}](https://twitter.com/i/user/{member_inst['twitter_identifier']}): {member_inst['count']}" for member_inst in summary])
         )
-        '''
-        embed.add_field(
-            name="CONTRACT",
-            value=project_obj.contract_address
-        )
-        '''
+        # also prepare a csv file for internal use
+        header = ['Name', 'Twitter','Count']
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(header)
+        for member_inst in summary:
+            data = [member_inst['username'],f"https://twitter.com/i/user/{member_inst['twitter_identifier']}", member_inst['count']]
+            writer.writerow(header)
+            writer.writerows(data)
+        buffer.seek(0) #Don't know why this is here, but it worked...
+        csv.close()
+        await self.longtails_log_channel.send(file=discord.File(buffer, f"{project_obj.name}.csv"))
         await self.longtails_channel.send(embed=embed)
 
     @tasks.loop(seconds=60)
