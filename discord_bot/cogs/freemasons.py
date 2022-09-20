@@ -62,7 +62,6 @@ class FreeMasons(commands.Cog):
             data = [member_inst['username'],f"https://twitter.com/i/user/{member_inst['twitter_identifier']}", member_inst['count']]
             writer.writerow(data)
         buffer.seek(0) #Don't know why this is here, but it worked...
-        csv.close()
         await self.longtails_log_channel.send(file=discord.File(buffer, f"{project_obj.name}-{django.utils.timezone.now()}.csv"))
         await self.longtails_channel.send(embed=embed)
 
