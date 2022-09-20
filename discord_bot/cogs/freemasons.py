@@ -60,8 +60,7 @@ class FreeMasons(commands.Cog):
         writer.writerow(header)
         for member_inst in summary:
             data = [member_inst['username'],f"https://twitter.com/i/user/{member_inst['twitter_identifier']}", member_inst['count']]
-            writer.writerow(header)
-            writer.writerows(data)
+            writer.writerow(data)
         buffer.seek(0) #Don't know why this is here, but it worked...
         csv.close()
         await self.longtails_log_channel.send(file=discord.File(buffer, f"{project_obj.name}-{django.utils.timezone.now()}.csv"))
